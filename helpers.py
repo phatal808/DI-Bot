@@ -9,19 +9,10 @@ import pytesseract
 import cv2
 import numpy as np
 
+from lists import CLASS_OPTIONS, STAT_NAMES_PAGE1, STAT_NAMES_PAGE2
+
 
 WINDOW_TITLE = "Diablo Immortal"
-
-CLASS_OPTIONS = {
-    "Barbarian": ["Lacerate", "Frenzy"],
-    "Blood Knight": ["Shadow's Edge", "Shadow's Embrace"],
-    "Crusader": ["Punish", "Sacred Fire"],
-    "Demon Hunter": ["Crossbow Show", "Explosive Arrow"],
-    "Monk": ["Fists of Thunder", "Deadly Reach"],
-    "Necromancer": ["Soulfire", "Bone Spear"],
-    "Tempest": ["Wind Edge", "Wave Edge"],
-    "Wizard": ["Electrocute", "Magic Missile"],
-}
 
 
 def bring_window_to_foreground(title: str):
@@ -197,39 +188,6 @@ def update_player_json(name, level, paragon, stats, **extra):
         json.dump(data, f, indent=2)
 
 
-STAT_NAMES_PAGE1 = [
-    "Damage",
-    "Life",
-    "Combat Rating",
-    "Strength",
-    "Intelligence",
-    "Fortitude",
-    "Vitality",
-    "Willpower",
-]
-
-STAT_NAMES_PAGE2 = [
-    "Armor",
-    "Armor Penetration",
-    "Potency",
-    "Resistance",
-    "Accuracy Rating",
-    "Evasion Rating",
-    "Critical Hit Chance",
-    "Critical Resistance",
-    "Critical Hit Damage",
-    "Attack Speed",
-    "Cooldown Reduction",
-    "Movement Speed",
-    "Block Chance",
-    "Life Drain",
-    "Cheat Death",
-    "Life Regeneration",
-    "Damage Increase",
-    "Defense Increase",
-    "Magic Find",
-    "Resonance",
-]
 
 
 def parse_stats(text: str, wanted_names):

@@ -8,9 +8,8 @@ from helpers import (
     detect_class,
     parse_stats,
     update_player_json,
-    STAT_NAMES_PAGE1,
-    STAT_NAMES_PAGE2,
 )
+from lists import STAT_NAMES_PAGE1, STAT_NAMES_PAGE2
 
 
 def main(**extra):
