@@ -10,7 +10,8 @@ import pyautogui
 import keyboard
 import pytesseract
 
-import automate_diablo
+import helpers
+import main
 
 TEMPLATE_PATH = Path("template.png")
 THRESHOLD = 0.80
@@ -82,8 +83,8 @@ def parse_member_entry(window):
     col4_x = left + col_w * 2 + col3_w
     last_w = right - col4_x
 
-    col1 = automate_diablo.ocr_region(window, left, top, col_w, height)
-    name, level, paragon = automate_diablo.parse_player_info(col1)
+    col1 = helpers.ocr_region(window, left, top, col_w, height)
+    name, level, paragon = helpers.parse_player_info(col1)
 
     # Trim the last_online region so it doesn't include neighboring columns
     col3_x = left + col_w * 2 + 150
@@ -112,7 +113,7 @@ def parse_member_entry(window):
         last_online = None
 
     # Rank is taken from the fourth column of the row
-    col4 = automate_diablo.ocr_region(window, col4_x, top, last_w, height)
+    col4 = helpers.ocr_region(window, col4_x, top, last_w, height)
     rank_text = " ".join(l.strip() for l in col4.splitlines() if l.strip())
     rank_text = rank_text.replace("|", "I")
     parts = rank_text.split()
@@ -143,7 +144,7 @@ def find_template(window):
 
 
 def main():
-    window = automate_diablo.bring_window_to_foreground(automate_diablo.WINDOW_TITLE)
+    window = helpers.bring_window_to_foreground(helpers.WINDOW_TITLE)
 
     # Assume there are 96 members and iterate until the last player repeats.
     pyautogui.moveTo(window.left + 1382, window.top + 446)
@@ -188,9 +189,9 @@ def main():
             pyautogui.click(*pos)
             time.sleep(1)
             try:
-                automate_diablo.main(last_online=last_online, rank=rank)
+                main.main(last_online=last_online, rank=rank)
             except Exception as e:
-                print(f"automate_diablo failed: {e}")
+                print(f"automation failed: {e}")
         else:
             print("template not found")
 
@@ -231,9 +232,9 @@ def main():
             pyautogui.click(*pos)
             time.sleep(1)
             try:
-                automate_diablo.main(last_online=last_online, rank=rank)
+                main.main(last_online=last_online, rank=rank)
             except Exception as e:
-                print(f"automate_diablo failed: {e}")
+                print(f"automation failed: {e}")
         else:
             print("template not found")
 

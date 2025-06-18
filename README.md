@@ -13,7 +13,7 @@ Run the automation script while the game is running. Press **F8** to pause/resum
 and **F9** to stop whenever supported:
 
 ```
-python automate_diablo.py
+python main.py
 ```
 
 The script captures character information and statistics and stores them in

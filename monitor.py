@@ -19,7 +19,8 @@ Run both game and script at the same privilege level (Admin if needed).
 """
 from __future__ import annotations
 
-import automate_diablo  # reference other module
+import helpers  # helper utilities
+import main  # main automation routine
 import time
 from datetime import datetime
 from pathlib import Path
@@ -156,14 +157,14 @@ with mss.mss() as sct:
                         tx = SEARCH_REGION["left"] + loc[0] + TEMP_W // 2
                         ty = SEARCH_REGION["top"]  + loc[1] + TEMP_H // 2
 
-                        window = automate_diablo.bring_window_to_foreground(WINDOW_TITLE)
+                        window = helpers.bring_window_to_foreground(WINDOW_TITLE)
 
                         # The small info panel appears near the template.
                         # Derive its top-left corner relative to where the
                         # template was detected.
                         info_left = tx - 35 - window.left
                         info_top = ty - 160 - window.top
-                        info_text = automate_diablo.ocr_region(window, info_left, info_top, 498, 105)
+                        info_text = helpers.ocr_region(window, info_left, info_top, 498, 105)
                         clan = None
                         warband = None
                         for line in info_text.splitlines():
@@ -176,11 +177,11 @@ with mss.mss() as sct:
                         print(f"Template {val:.2f} → click ({tx},{ty})")
                         raw_click(tx, ty)
                         winsound.Beep(1800, 200)
-                        print("Launching automate_diablo...")
+                        print("Launching automation...")
                         try:
-                            automate_diablo.main(clan=clan, warband=warband)
+                            main.main(clan=clan, warband=warband)
                         except Exception as e:
-                            print(f"automate_diablo failed: {e}")
+                            print(f"automation failed: {e}")
                         state = "color"
                         next_color_time = time.time() + COLOR_PAUSE_SEC
                         continue
