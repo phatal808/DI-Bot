@@ -143,7 +143,7 @@ def find_template(window):
     return None
 
 
-def main():
+def run():
     window = helpers.bring_window_to_foreground(helpers.WINDOW_TITLE)
 
     # Assume there are 96 members and iterate until the last player repeats.
@@ -244,4 +244,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    run()
