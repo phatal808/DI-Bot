@@ -27,7 +27,10 @@ def main(**extra):
     skills_text = ocr_region(window, 1805, 390, 315, 50)
     player_class = detect_class(skills_text)
     # Return to the main Attributes screen via the back arrow
-    pyautogui.click(window.left + 1556, window.top + 196)
+    # Use the correct offset for the back arrow to return to the main
+    # Attributes screen. The back button lies 1670 pixels from the left
+    # edge of the window.
+    pyautogui.click(window.left + 1670, window.top + 196)
     time.sleep(1)
 
     pyautogui.click(window.left + 1760, window.top + 510)
