@@ -24,8 +24,12 @@ import main  # main automation routine
 import time
 from datetime import datetime
 from pathlib import Path
+import json
+import re
+import pyautogui
 
 import cv2
+import pytesseract
 import mss
 import numpy as np
 import pydirectinput as pdi       # ← DirectInput wrapper
@@ -46,6 +50,10 @@ COLOR_HEX     = "E0BE83"
 TOLERANCE     = 5
 CLICK_OFFSET_Y = 145
 COLOR_PAUSE_SEC, TEMPLATE_WINDOW_SEC = 2.5, 2.0
+
+# debug paths
+INFO_JSON = Path("info_debug.json")
+INFO_DIR = Path("info_shots")
 
 # --------------------- PREP --------------------------------------------------
 if not TEMPLATE_PATH.exists():
@@ -88,6 +96,38 @@ def raw_click(x: int, y: int):
     win32api.SetCursorPos((x, y))
     win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0)
     win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP,   0, 0, 0, 0)
+
+
+def capture_region_text(window, left, top, width, height):
+    """Return OCR text and the screenshot image for the region."""
+    x = window.left + left
+    y = window.top + top
+    screenshot = pyautogui.screenshot(region=(x, y, width, height))
+    img = cv2.cvtColor(np.array(screenshot), cv2.COLOR_RGB2BGR)
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    text = pytesseract.image_to_string(gray).replace("\u00e9", "?")
+    return text, screenshot
+
+
+def _save_debug(json_path: Path, img_dir: Path, name: str | None, raw_text: str, image):
+    img_dir.mkdir(exist_ok=True)
+    ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+    base = re.sub(r"[^A-Za-z0-9-]", "", name) if name else "unknown"
+    image.save(img_dir / f"{base}_{ts}.png")
+
+    try:
+        with open(json_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+    except FileNotFoundError:
+        data = []
+
+    data.append({"time": ts, "name": name, "text": raw_text})
+    with open(json_path, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2)
+
+
+def save_info_debug(name: str | None, raw_text: str, image):
+    _save_debug(INFO_JSON, INFO_DIR, name, raw_text, image)
 
 # --------------------- TOGGLE ------------------------------------------------
 _enabled = True
@@ -164,15 +204,23 @@ with mss.mss() as sct:
                         # template was detected.
                         info_left = tx - 35 - window.left
                         info_top = ty - 160 - window.top
-                        info_text = helpers.ocr_region(window, info_left, info_top, 498, 105)
+                        info_text, info_img = capture_region_text(
+                            window, info_left, info_top, 498, 105
+                        )
                         clan = None
                         warband = None
+                        name_candidate = None
                         for line in info_text.splitlines():
                             line = line.strip()
+                            if not line:
+                                continue
+                            if name_candidate is None:
+                                name_candidate = re.sub(r"[^A-Za-z0-9-]", "", line)
                             if line.lower().startswith("clan:"):
                                 clan = line.split(":", 1)[1].strip()
                             elif line.lower().startswith("warband:"):
                                 warband = line.split(":", 1)[1].strip()
+                        save_info_debug(name_candidate, info_text, info_img)
 
                         print(f"Template {val:.2f} → click ({tx},{ty})")
                         raw_click(tx, ty)
