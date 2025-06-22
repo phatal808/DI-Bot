@@ -1,4 +1,9 @@
 import time
+import json
+import re
+from datetime import datetime
+from pathlib import Path
+
 import pyautogui
 from helpers import (
     WINDOW_TITLE,
@@ -11,12 +16,35 @@ from helpers import (
 )
 from lists import STAT_NAMES_PAGE1, STAT_NAMES_PAGE2
 
+# Debug export paths for player info
+INFO_JSON = Path("player_info_debug.json")
+INFO_DIR = Path("player_info_shots")
+
+
+def _save_debug(name: str | None, raw_text: str, image):
+    INFO_DIR.mkdir(exist_ok=True)
+    ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+    base = re.sub(r"[^A-Za-z0-9-]", "", name) if name else "unknown"
+    image.save(INFO_DIR / f"{base}_{ts}.png")
+
+    try:
+        with open(INFO_JSON, "r", encoding="utf-8") as f:
+            data = json.load(f)
+    except FileNotFoundError:
+        data = []
+
+    data.append({"time": ts, "name": name, "text": raw_text})
+    with open(INFO_JSON, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2)
+
 
 def main(**extra):
     window = bring_window_to_foreground(WINDOW_TITLE)
 
     info_text = ocr_region(window, 1920, 110, 410, 160)
+    info_img = pyautogui.screenshot(region=(window.left + 1920, window.top + 110, 410, 160))
     name, level, paragon = parse_player_info(info_text)
+    _save_debug(name, info_text, info_img)
     if name is None:
         print("Unable to read player information")
         return None
