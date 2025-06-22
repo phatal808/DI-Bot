@@ -3,9 +3,9 @@
 # Mapping of class names to identifying skill phrases
 CLASS_OPTIONS = {
     "Barbarian": ["Lacerate", "Frenzy"],
-    "Blood Knight": ["Shadow's Edge", "Shadow's Embrace"],
+    "Blood Knight": ["Shadow's Edge", "Ravage"],
     "Crusader": ["Punish", "Sacred Fire"],
-    "Demon Hunter": ["Crossbow Show", "Explosive Arrow"],
+    "Demon Hunter": ["Crossbow Shot", "Explosive Arrow"],
     "Monk": ["Fists of Thunder", "Deadly Reach"],
     "Necromancer": ["Soulfire", "Bone Spear"],
     "Tempest": ["Wind Edge", "Wave Edge"],

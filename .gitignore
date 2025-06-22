@@ -1,5 +1,7 @@
 __pycache__/
 *.pyc
 players.json
-last_online_debug.json
-last_online_shots/
+rank_debug.json
+rank_shots/
+name_debug.json
+name_shots/

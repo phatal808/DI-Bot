@@ -40,8 +40,10 @@ keyboard.add_hotkey("f9", _stop)
 # Coordinates match earlier working version
 COL_REGION = (860, 395, 2485, 570)
 
-LAST_ONLINE_JSON = Path("last_online_debug.json")
-LAST_ONLINE_DIR = Path("last_online_shots")
+RANK_JSON = Path("rank_debug.json")
+RANK_DIR = Path("rank_shots")
+NAME_JSON = Path("name_debug.json")
+NAME_DIR = Path("name_shots")
 
 
 def capture_region_text(window, left, top, width, height):
@@ -55,22 +57,29 @@ def capture_region_text(window, left, top, width, height):
     return text, screenshot
 
 
-def save_last_online_debug(name, raw_text, image):
-    LAST_ONLINE_DIR.mkdir(exist_ok=True)
+def _save_debug(json_path, img_dir, name, raw_text, image):
+    img_dir.mkdir(exist_ok=True)
     ts = datetime.now().strftime("%Y%m%d_%H%M%S")
     base = re.sub(r"[^A-Za-z0-9-]", "", name) if name else "unknown"
-    img_path = LAST_ONLINE_DIR / f"{base}_{ts}.png"
-    image.save(img_path)
+    image.save(img_dir / f"{base}_{ts}.png")
 
     try:
-        with open(LAST_ONLINE_JSON, "r", encoding="utf-8") as f:
+        with open(json_path, "r", encoding="utf-8") as f:
             data = json.load(f)
     except FileNotFoundError:
         data = []
 
     data.append({"time": ts, "name": name, "text": raw_text})
-    with open(LAST_ONLINE_JSON, "w", encoding="utf-8") as f:
+    with open(json_path, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2)
+
+
+def save_name_debug(name, raw_text, image):
+    _save_debug(NAME_JSON, NAME_DIR, name, raw_text, image)
+
+
+def save_rank_debug(name, raw_text, image):
+    _save_debug(RANK_JSON, RANK_DIR, name, raw_text, image)
 
 
 
@@ -83,17 +92,17 @@ def parse_member_entry(window):
     col4_x = left + col_w * 2 + col3_w
     last_w = right - col4_x
 
-    col1 = helpers.ocr_region(window, left, top, col_w, height)
-    name, level, paragon = helpers.parse_player_info(col1)
+    col1_text, col1_img = capture_region_text(window, left, top, col_w, height)
+    name, level, paragon = helpers.parse_player_info(col1_text)
+    save_name_debug(name, col1_text, col1_img)
 
     # Trim the last_online region so it doesn't include neighboring columns
     col3_x = left + col_w * 2 + 150
     col3_y = top + 70
     col3_w_narrow = col3_w - 200
     col3_h_narrow = height - 125
-    col3_text, col3_img = capture_region_text(window, col3_x, col3_y, col3_w_narrow, col3_h_narrow)
+    col3_text, _ = capture_region_text(window, col3_x, col3_y, col3_w_narrow, col3_h_narrow)
     col3_text = " ".join(l.strip() for l in col3_text.splitlines() if l.strip())
-    save_last_online_debug(name, col3_text, col3_img)
 
     clean = col3_text.strip()
 
@@ -113,8 +122,9 @@ def parse_member_entry(window):
         last_online = None
 
     # Rank is taken from the fourth column of the row
-    col4 = helpers.ocr_region(window, col4_x, top, last_w, height)
-    rank_text = " ".join(l.strip() for l in col4.splitlines() if l.strip())
+    col4_text, col4_img = capture_region_text(window, col4_x, top, last_w, height)
+    rank_text = " ".join(l.strip() for l in col4_text.splitlines() if l.strip())
+    save_rank_debug(name, rank_text, col4_img)
     rank_text = rank_text.replace("|", "I")
     parts = rank_text.split()
     if len(parts) >= 2:
