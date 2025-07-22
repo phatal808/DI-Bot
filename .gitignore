@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+players.json
+rank_debug.json
+rank_shots/
+name_debug.json
+name_shots/
+info_debug.json
+info_shots/
+player_info_debug.json
+player_info_shots/
